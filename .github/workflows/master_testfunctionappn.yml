@@ -43,14 +43,23 @@ jobs:
   deploy:
     runs-on: windows-latest
     needs: build
-    __environment__
     
+    permissions:
+      id-token: write #This is required for requesting the JWT
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
       
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F8CB10F8503E4E86A0A77C593FC14FED }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_15034402992045FFA979377A20C1CF00 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_83CD5B48D55141468AC4DFB66C34CA13 }}
+
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         id: fa
@@ -58,4 +67,4 @@ jobs:
           app-name: 'testfunctionappn'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8239869B49364ECCBECC62F5CB34F136 }}
+          
